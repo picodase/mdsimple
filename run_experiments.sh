@@ -16,7 +16,9 @@ mkdir expts
 cd expts
 
 # make experiment directories
-mkdir ./{Acetone,Cyp,Fab}_1_{298,490}_{Vac,HHO,AON}
+#mkdir ./{Acetone,Cyp,Fab}_1_{298,490}_{Vac,HHO,AON}
+#mkdir ./{Acetone}_1_{298,490}_{HHO,AON}
+
 
 # create/write specialized mdp files to the appropriate directory (IN PROGRESS)
 
