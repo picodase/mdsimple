@@ -1,0 +1,3 @@
+- The program will take in a set of variables either through a command-line interface or input with a configuration file.
+- UNIX shell commands will be used prolifically (sed and grep for file tweaking; parallel, cd, rm, and mkdir for MD parameter file creation and copying).
+- 
