@@ -18,6 +18,8 @@ cd expts
 # make experiment directories
 #mkdir ./{Acetone,Cyp,Fab}_1_{298,490}_{Vac,HHO,AON}
 #mkdir ./{Acetone}_1_{298,490}_{HHO,AON}
+#use a for-loop to loop through the array passed by the user?
+
 
 
 # create/write specialized mdp files to the appropriate directory (IN PROGRESS)
@@ -25,5 +27,10 @@ cd expts
 # copy standard md files into each directory
 parallel cp -r standard/ solv_boxes/ solv_topols/ ::: ./{Acetone,Cyp,Fab}_1_{298,490}_{Vac,HHO,AON}
 
-#
+# use sed to edit the MDP files for each run
+#- Ensure you make the files dynamically indexable; do NOT write w.r.t. specific line numbers, use a special token, e.g. [EXPTEMP]
+
+# for each file in a given experimental folder,
+    # apply a unique set of changes to the specific folders' mdp files using sed
+# endfor
 
