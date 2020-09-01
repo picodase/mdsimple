@@ -49,19 +49,9 @@ do
                     #bash gmd_setup.sh
 
                 done
-                #echo "" #### print the new line ###
             done
-            #echo "" #### print the new line ###
-        done          
-        #echo "" #### print the new line ###
+        done
     done
-    #echo "" #### print the new line ###
 done
 
 # ******************</PREPARE EXPT FOLDERS>*******************
-
-# ******************<RUN SIMULATIONS>********************
-
-# for each folder,
-    # run qsub qsub_emin_nvt_npt.sh
-# RUN SIMULATIONS
