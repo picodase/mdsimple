@@ -11,13 +11,23 @@
 
 # ******************</DECLARE VARIABLES AND CONSTANTS>*******************
 
+# filepaths
+mdl_fp="/home/jacobnorth/Documents/GitHub/mdsimple/models/"
+mdp_fp="/home/jacobnorth/Documents/GitHub/mdsimple/standard/"
+
 # specify all variables beforehand
 sim_modl=(acetone cyp fab)     # names of pdb-type models in PWD/modl verified pre-simulation
 sim_reps=(1)     # number of replicates to run each simulation for
 sim_tmps=(298 310)
 sim_solv=(SPC AON)     # names of solvents in PWD/solv verified pre-simulation
 sim_ffld=(G54a7)     # names of force fields in PWD/ffld (?) verified pre-simulation
+sim_stps=(5000000)     # length of time
 #sim_ligs=(None)     # names of ligands (can be array of arrays!) in PWD/ligs verified pre-simulation
+
+# selection variables for mdp files
+solv_itc=("4.5e-5" "1.25e-2")
+sys_prot="Protein"
+sys_solv="Non-Protein"
 
 # ******************<PREPARE EXPT FOLDERS>********************
 
@@ -37,20 +47,45 @@ do
             do
                 for (( m = 0 ; m <= ${#sim_ffld[@]}-1; m++ ))
                 do
-                    mkdir ${sim_modl[i]}_${sim_reps[j]}_${sim_tmps[k]}_${sim_solv[l]}_${sim_ffld[m]}
-                    #echo -n "$i "
-                    # copy standard folder of mdps over to cwd
-                    cp ../../standard .
+                    for (( n = 0 ; n <= ${#sim_stps[@]}-1; n++ ))
+                    do
+                        mkdir ${sim_modl[i]}_${sim_reps[j]}_${sim_tmps[k]}_${sim_solv[l]}_${sim_ffld[m]}_${sim_stps[n]}
 
-                    # copy proper model to cwd
-                    cp ../../models/*${sim_modl}.pdb .
+                        # enter the new folder
+                        cd ${sim_modl[i]}_${sim_reps[j]}_${sim_tmps[k]}_${sim_solv[l]}_${sim_ffld[m]}_${sim_stps[n]}
 
-                    # use sed to replace sim params with desired parameters
-                    ## Ensure you make the files dynamically indexable; do NOT write w.r.t. specific line numbers, use a special token, e.g. [EXPTEMP]
+                        # copy standard folder of mdps over to cwd
+                        cp -r ${mdp_fp}/ .
 
-                    # run all pre-processing steps
-                    #bash gmd_setup.sh
+                        # copy proper model to cwd
+                        cp ${mdl_fp}*${sim_modl[i]}.pdb .
 
+                        # use sed to replace sim params with desired parameters
+                        ## Ensure you make the files dynamically indexable; do NOT write w.r.t. specific line numbers, use a special token, e.g. [EXPTEMP]
+                        
+                        # in em.mdp, replace nothing
+
+                        # in nvt.mdp,
+                        sed -i "s/[REF_TEMP]/${sims_tmp[k]}/g}" standard/nvt.mdp    # replace [REF_TEMP] with sim_tmps[k]
+                        sed -i "s/[PROT]/${sys_prot}/g}" standard/nvt.mdp   # replace [PROT] with sys_prot
+                        sed -i "s/[SOLV]/${sys_solv}/g}" standard/nvt.mdp   # replace [SOLV] with sys_solv
+
+                        # in npt.mdp, replace
+                        sed -i "s/[PROT]/${sys_prot}/g}" standard/npt.mdp   # replace [PROT] with sys_prot
+                        sed -i "s/[SOLV]/${sys_solv}/g}" standard/npt.mdp   # replace [SOLV] with sys_solv
+                        sed -i "s/[SOL_ITC]/${solv_itc[l]}/g}" standard/npt.mdp    # replace [SOL_ITC] with solv_itc[l]
+
+                        # in md.mdp, 
+                        sed -i "s/[N_STEPS]/${sim_stps}/g" standard/md.mdp  # replace [N_STEPS] with 5000000 for 10ns sim
+                        sed -i "s/[REF_TEMP]/${sim_tmps[k]}/g" standard/md.mdp    # replace [REF_TEMP] with sim_tmps[k]
+                        sed -i "s/[SOL_ITC]/${solv_itc[l]}"    # replace [SOL_ITC] with solv_itc[l]
+
+                        # run all pre-processing steps
+                        #bash gmd_setup.sh
+
+                        # exit the folder
+                        cd ..
+                    done
                 done
             done
         done
