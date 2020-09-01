@@ -12,7 +12,7 @@
 # ******************</DECLARE VARIABLES AND CONSTANTS>*******************
 
 # specify all variables beforehand
-sim_modl=(Acetone CypA FAB)     # names of pdb-type models in PWD/modl verified pre-simulation
+sim_modl=(acetone cyp fab)     # names of pdb-type models in PWD/modl verified pre-simulation
 sim_reps=(1)     # number of replicates to run each simulation for
 sim_tmps=(298 310)
 sim_solv=(SPC AON)     # names of solvents in PWD/solv verified pre-simulation
@@ -40,8 +40,11 @@ do
                     mkdir ${sim_modl[i]}_${sim_reps[j]}_${sim_tmps[k]}_${sim_solv[l]}_${sim_ffld[m]}
                     #echo -n "$i "
                     # copy standard folder of mdps over to cwd
-                    #cp ../../standard .
-                    
+                    cp ../../standard .
+
+                    # copy proper model to cwd
+                    cp ../../models/*${sim_modl}.pdb .
+
                     # use sed to replace sim params with desired parameters
                     ## Ensure you make the files dynamically indexable; do NOT write w.r.t. specific line numbers, use a special token, e.g. [EXPTEMP]
 

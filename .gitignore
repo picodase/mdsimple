@@ -2,3 +2,5 @@ solv_topols/*
 standard/*
 vh_csa_files/*
 solv_boxes/*
+gromos54a7_atb.ff/*
+models/*
