@@ -5,3 +5,4 @@ solv_boxes/*
 gromos54a7_atb.ff/*
 models/*
 expts/*
+sim_src/*

@@ -25,7 +25,9 @@ sim_stps=(5000000)     # length of time
 #sim_ligs=(None)     # names of ligands (can be array of arrays!) in PWD/ligs verified pre-simulation
 
 # selection variables for mdp files
+spec_pref=("csa")
 solv_itc=("4.5e-5" "1.25e-2")
+solv_file=("spc216.gro" "gromos54a7_atb.ff/aon_box_g.gro")
 sys_prot="Protein"
 sys_solv="Non-Protein"
 
@@ -57,14 +59,14 @@ do
                         cd ${sim_name}
 
                         # copy standard data to cwd
-                        cp ../../topol.top ../../csa_newbox.gro .   # topology and box coord file       # currently for a single protein type!
+                        cp ../../sim_src/topol.top ../../sim_src/${spec_pref}_newbox.gro .   # topology and box coord file       # currently for a single protein type!
                         cp -r ${mdp_fp}/ .                  # copy standard folder of mdps
                         cp ${mdl_fp}*${sim_modl[i]}.pdb .   # copy proper model
                         cp -r ../../*.ff/ .                 # copy ff dir
 
                         # use sed to replace sim params with desired parameters
                         ## Ensure you make the files dynamically indexable; do NOT write w.r.t. specific line numbers, use a special token, e.g. [EXPTEMP]
-                        
+
                         # in em.mdp, 
                         sed -i "s/SIM_TITLE/${sim_name}/g" standard/em.mdp
 
@@ -89,10 +91,15 @@ do
                         sed -i "s/SOLV/${sys_solv}/g" standard/md.mdp   # replace [SOLV] with sys_solv
 
                         # run all pre-processing steps
-                        #bash gmd_setup.sh
 
-                        # exit the folder
-                        cd ..
+                        name=${spec_pref}_${sim_modl[i]}        # shorthand for filenames
+
+                        gmx solvate -cp ${spec_pref}_newbox.gro -cs ${solv_file[l]} -o ${name}_solv.gro -p topol.top
+                        gmx grompp -f standard/ions.mdp -c ${name}_solv.gro -p topol.top -o ions.tpr -maxwarn 1    # Generate the restraint file
+                        gmx genion -s ions.tpr -o ${name}_solv_ions.gro -p topol.top -pname NA -nname CL -neutral   # Generate ions inside the box
+                        gmx grompp -f standard/em.mdp -c ${name}_solv_ions.gro -p topol.top -o em.tpr -maxwarn 1    # Assemble the binary input
+
+                        cd ..           # exit the folder
                     done
                 done
             done
