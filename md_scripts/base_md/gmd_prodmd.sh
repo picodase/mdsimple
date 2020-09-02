@@ -1,10 +1,10 @@
 #!/bin/bash
 
 # Download the .mdp for the NVT equilib
-wget http://www.mdtutorials.com/gmx/lysozyme/Files/md.mdp
+#wget http://www.mdtutorials.com/gmx/lysozyme/Files/md.mdp
 
 # Pre-process the input files, predict PME load
-gmx grompp -f standard/md_1ns.mdp -c npt.gro -t npt.cpt -p topol.top -o md_0_1.tpr
+gmx grompp -f standard/md.mdp -c npt.gro -t npt.cpt -p topol.top -o md_0_1.tpr
 
 # Run the production MD sim:
 gmx mdrun -deffnm md_0_1	
