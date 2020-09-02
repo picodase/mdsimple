@@ -4,12 +4,16 @@
 #wget http://www.mdtutorials.com/gmx/lysozyme/Files/md.mdp
 
 # Pre-process the input files, predict PME load
-gmx grompp -f standard/md.mdp -c npt.gro -t npt.cpt -p topol.top -o md_0_1.tpr
+gmx grompp -f standard/md.mdp -c npt.gro -t npt.cpt -p topol.top -o md_0_1.tpr -maxwarn 2
 
 # Run the production MD sim:
-gmx mdrun -deffnm md_0_1	
+
 # ON CPU
-# mdrun -deffnm md_0_1 -nb gpu	# ON ONE GPU
+gmx mdrun -deffnm md_0_1	
+
+# ON ONE GPU
+# mdrun -deffnm md_0_1 -nb gpu	
+
 # ON MULTIPLE GPUS???
 
 # Create plot of pressure, ensure T is stable

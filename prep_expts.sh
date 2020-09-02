@@ -14,7 +14,8 @@
 # filepaths
 mdl_fp="/home/jacobnorth/Documents/GitHub/mdsimple/models/"
 mdp_fp="/home/jacobnorth/Documents/GitHub/mdsimple/standard/"
-md_ff=""
+md_ff="/home/jacobnorth/Documents/GitHub/mdsimple/gromos54a7_atb.ff/"
+md_base="/home/jacobnorth/Documents/GitHub/mdsimple/md_scripts/base_md/"
 md_simsrc="/home/jacobnorth/Documents/GitHub/mdsimple/sim_src/"
 
 # specify all variables beforehand
@@ -64,10 +65,11 @@ do
                         cd ${sim_name}
 
                         # copy standard data to cwd
-                        cp ${md_simsrc}topol.top ${md_simsrc}${spec_pref}_newbox.gro ${md_simsrc}posre.itp .  # topology, box coord, posre files       # currently for a single protein type!
-                        cp -r ${mdp_fp}/ .                  # copy standard folder of mdps
+                        cp ${md_simsrc}* .  # topology, box coord, posre files       # currently for a single protein type!
+                        cp ${md_base}* .            # copy everything in md_base to cwd
+                        cp -r ${mdp_fp} .                  # copy standard folder of mdps
                         cp ${mdl_fp}*${sim_modl[i]}.pdb .   # copy proper model
-                        cp -r ../../*.ff/ .                 # copy ff dir
+                        cp -r ../../*.ff/ .                 # copy ff dirs
 
                         # use sed to replace sim params with desired parameters
                         ## Ensure you make the files dynamically indexable; do NOT write w.r.t. specific line numbers, use a special token, e.g. [EXPTEMP]
