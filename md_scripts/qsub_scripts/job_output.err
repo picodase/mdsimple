@@ -1,0 +1,6 @@
+gmx: /lib64/libstdc++.so.6: version `GLIBCXX_3.4.20' not found (required by gmx)
+gmx: /lib64/libstdc++.so.6: version `CXXABI_1.3.8' not found (required by gmx)
+gmx: /lib64/libstdc++.so.6: version `GLIBCXX_3.4.21' not found (required by gmx)
+gmx: /lib64/libstdc++.so.6: version `GLIBCXX_3.4.20' not found (required by gmx)
+gmx: /lib64/libstdc++.so.6: version `CXXABI_1.3.8' not found (required by gmx)
+gmx: /lib64/libstdc++.so.6: version `GLIBCXX_3.4.21' not found (required by gmx)

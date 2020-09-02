@@ -49,32 +49,39 @@ do
                 do
                     for (( n = 0 ; n <= ${#sim_stps[@]}-1; n++ ))
                     do
-                        mkdir ${sim_modl[i]}_${sim_reps[j]}_${sim_tmps[k]}_${sim_solv[l]}_${sim_ffld[m]}_${sim_stps[n]}
+                        sim_name="${sim_modl[i]}_${sim_reps[j]}_${sim_tmps[k]}_${sim_solv[l]}_${sim_ffld[m]}_${sim_stps[n]}"
+                        
+                        mkdir ${sim_name}
 
                         # enter the new folder
-                        cd ${sim_modl[i]}_${sim_reps[j]}_${sim_tmps[k]}_${sim_solv[l]}_${sim_ffld[m]}_${sim_stps[n]}
+                        cd ${sim_name}
 
                         # copy standard data to cwd
-                        cp -r ${mdp_fp}/ .  # copy standard folder of mdps
-                        cp ${mdl_fp}*${sim_modl[i]}.pdb .       # copy proper model
-                        cp -r ../../*.ff/ .    # copy ff dir
+                        cp ../../topol.top ../../csa_newbox.gro .   # topology and box coord file       # currently for a single protein type!
+                        cp -r ${mdp_fp}/ .                  # copy standard folder of mdps
+                        cp ${mdl_fp}*${sim_modl[i]}.pdb .   # copy proper model
+                        cp -r ../../*.ff/ .                 # copy ff dir
 
                         # use sed to replace sim params with desired parameters
                         ## Ensure you make the files dynamically indexable; do NOT write w.r.t. specific line numbers, use a special token, e.g. [EXPTEMP]
                         
-                        # in em.mdp, replace nothing
+                        # in em.mdp, 
+                        sed -i "s/SIM_TITLE/${sim_name}/g" standard/em.mdp
 
                         # in nvt.mdp,
+                        sed -i "s/SIM_TITLE/${sim_name}/g" standard/nvt.mdp                        
                         sed -i "s/T_REF/${sims_tmp[k]}/g" standard/nvt.mdp    # replace T_ref with sim_tmps[k]
                         sed -i "s/PROT/${sys_prot}/g" standard/nvt.mdp   # replace [PROT] with sys_prot
                         sed -i "s/SOLV/${sys_solv}/g" standard/nvt.mdp   # replace [SOLV] with sys_solv
 
                         # in npt.mdp, replace
+                        sed -i "s/SIM_TITLE/${sim_name}/g" standard/npt.mdp
                         sed -i "s/PROT/${sys_prot}/g" standard/npt.mdp   # replace [PROT] with sys_prot
                         sed -i "s/SOLV/${sys_solv}/g" standard/npt.mdp   # replace [SOLV] with sys_solv
                         sed -i "s/SOL_ITC/${solv_itc[l]}/g" standard/npt.mdp    # replace [SOL_ITC] with solv_itc[l]
 
                         # in md.mdp, 
+                        sed -i "s/SIM_TITLE/${sim_name}/g" standard/md.mdp                        
                         sed -i "s/N_STEPS/${sim_stps}/g" standard/md.mdp  # replace [N_STEPS] with 5000000 for 10ns sim
                         sed -i "s/T_REF/${sim_tmps[k]}/g" standard/md.mdp    # replace T_ref with sim_tmps[k]
                         sed -i "s/SOL_ITC/${solv_itc[l]}/g" standard/md.mdp   # replace [SOL_ITC] with solv_itc[l]

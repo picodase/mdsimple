@@ -1,0 +1,6 @@
+Converting PDB to GMX format and setting water model and force field types
+setup_GROMACS_job.sh: line 27: pdb2gmx: command not found
+setup_GROMACS_job.sh: line 30: editconf: command not found
+setup_GROMACS_job.sh: line 34: solvate: command not found
+ 
+Preprocessing GROMACS Configuration
