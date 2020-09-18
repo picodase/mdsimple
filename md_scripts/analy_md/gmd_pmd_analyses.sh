@@ -3,11 +3,11 @@
 # Center the trajectory on the protein's center, don't allow periodity weirdness
 trjconv -s md_0_1.tpr -f md_0_1.xtc -o md_0_1_ctr_noPBC.xtc -pbc mol -center
 
-# make rotation invariant
-gmx trjconv -f md_0_1.xtc -s md_0_1.tpr -o out.xtc -pbc nojump
+# PROCESS
+gmx trjconv -f md_0_1_ctr_noPBC.xtc -s md_0_1.tpr -o out.xtc -pbc nojump        # reduce jumping
+gmx trjconv -f md_0_1.xtc -s md_0_1.tpr -o out.xtc -pbc nojump                  # make rotation invariant
+gmx trjconv -f out.xtc -s md_0_1.tpr -o md_0_1_processed.pdb -fit rot+trans     # reduce rot/trans 
 
-# reduce rot/trans 
-gmx trjconv -f out.xtc -s md_0_1.tpr -o md_0_1_processed.pdb -fit rot+trans
 
 # Calculate RMSD on the corrected trajectory
 rms -s md_0_1.tpr -f md_0_1_ctr_noPBC.xtc -o rmsd.xvg -tu ns
