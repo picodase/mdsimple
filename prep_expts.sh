@@ -19,9 +19,10 @@ md_base="/home/jacobnorth/Documents/GitHub/mdsimple/md_scripts/base_md/"
 md_simsrc="/home/jacobnorth/Documents/GitHub/mdsimple/sim_src/"
 
 # specify all variables beforehand
-sim_modl=(acetone cyp fab)     # names of pdb-type models in PWD/modl verified pre-simulation
+sim_modl=(5kv7 3okh)
+#sim_modl=(acetone cyp fab)     # names of pdb-type models in PWD/modl verified pre-simulation
 #sim_modl=(acetone)     # names of pdb-type models in PWD/modl verified pre-simulation
-sim_reps=(1)     # number of replicates to run each simulation for
+sim_reps=(1 2)     # number of replicates to run each simulation for
 sim_tmps=(298 310)
 #sim_tmps=(298)
 #sim_solv=(SPC AON)     # names of solvents in PWD/solv verified pre-simulation
@@ -31,9 +32,11 @@ sim_stps=(5000000)     # length of time
 #sim_ligs=(None)     # names of ligands (can be array of arrays!) in PWD/ligs verified pre-simulation
 
 # selection variables for mdp files
-spec_pref=("csa")
-solv_itc=("4.5e-5" "1.25e-2")
-solv_file=("spc216.gro" "gromos54a7_atb.ff/aon_box_g.gro")
+spec_pref=("drugdes_protein_dynamics")
+#solv_itc=("4.5e-5" "1.25e-2")
+solv_itc=("4.5e-5")
+#solv_file=("spc216.gro" "gromos54a7_atb.ff/aon_box_g.gro")
+solv_file=("spc216.gro")
 sys_prot="Protein"
 sys_solv="Non-Protein"
 
@@ -65,7 +68,9 @@ do
                         cd ${sim_name}
 
                         # copy standard data to cwd
-                        cp ${md_simsrc}* .  # topology, box coord, posre files       # currently for a single protein type!
+
+                        ##### UNCOMMENT THE FOLLOWING LINE IF YOU'RE JUST USING A SINGLE PROTEIN TYPE!!!#####
+                        #cp ${md_simsrc}* .  # topology, box coord, posre files       # currently for a single protein type!
                         cp ${md_base}* .            # copy everything in md_base to cwd
                         cp -r ${mdp_fp} .                  # copy standard folder of mdps
                         cp ${mdl_fp}*${sim_modl[i]}.pdb .   # copy proper model
@@ -90,7 +95,6 @@ do
                         sed -i "s/SOL_ITC/${solv_itc[l]}/g" standard/npt.mdp    # replace [SOL_ITC] with solv_itc[l]
                         sed -i "s/T_REF/${sim_tmps[k]}/g" standard/npt.mdp    # replace T_ref with sim_tmps[k]
 
-
                         # in md.mdp, 
                         sed -i "s/SIM_TITLE/${sim_name}/g" standard/md.mdp                        
                         sed -i "s/N_STEPS/${sim_stps}/g" standard/md.mdp  # replace [N_STEPS] with 5000000 for 10ns sim
@@ -101,9 +105,23 @@ do
 
                         # run all pre-processing steps
 
-                        name=${spec_pref}_${sim_modl[i]}        # shorthand for filenames
+                        #name=${spec_pref}_${sim_modl[i]}        # shorthand for filenames
+                        name=${sim_modl[i]}        # shorthand for filenames
 
-                        gmx solvate -cp ${spec_pref}_newbox.gro -cs ${solv_file[l]} -o ${name}_solv.gro -p topol.top
+                        ##### UNCOMMENT THE FOLLOWING LINES IF YOU'RE JUST USING A SINGLE PROTEIN TYPE!!!#####
+
+                        ##~~~~~~~~~~~~~~~~~~~~~~~~##
+                        # if the models have not been generated yet, you can create them here with this (best for only canonically supported structures by the ff):
+
+                        cp ${name}.pdb ${name}_clean.pdb        # alias, it's being weird now
+
+                        gmx pdb2gmx -f ${name}_clean.pdb -o ${name}_processed.gro       # convert to gmx
+                        gmx editconf -f ${name}_processed.gro -o ${name}_newbox.gro -c -d 1.0 -bt cubic # put in a box
+                        ##~~~~~~~~~~~~~~~~~~~~~~~~##
+
+                        #gmx solvate -cp ${spec_pref}_newbox.gro -cs ${solv_file[l]} -o ${name}_solv.gro -p topol.top
+                        gmx solvate -cp ${name}_newbox.gro -cs ${solv_file[l]} -o ${name}_solv.gro -p topol.top
+
                         gmx grompp -f standard/ions.mdp -c ${name}_solv.gro -p topol.top -o ions.tpr -maxwarn 1    # Generate the restraint file
                         gmx genion -s ions.tpr -o ${name}_solv_ions.gro -p topol.top -pname NA -nname CL -neutral   # Generate ions inside the box
                         gmx grompp -f standard/em.mdp -c ${name}_solv_ions.gro -p topol.top -o em.tpr -maxwarn 2    # Assemble the binary input
