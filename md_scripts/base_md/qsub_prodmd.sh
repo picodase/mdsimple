@@ -32,15 +32,36 @@ module unload gcc/5.1.0		# remove earlier gcc
 module load gcc/9.2.0		# load new gcc
 module load gromacs/2019-4	# load GMX
 
+# GPU computing
+module load cuda/10.1                   # load cuda
+#module load cuda91/toolkit/9.1.85       # load cuda toolkit
+module load python/anaconda3-5.0.0.1    # load anaconda
+
 ############################################</LOAD MODULES>###########################################
+
 
 ############################################<RUN COMMANDS>############################################
 
+# prepare shell: https://stackoverflow.com/questions/55507519/python-activate-conda-env-through-shell-script
+eval "$(command conda 'shell.bash' 'hook' 2> /dev/null)"
+
+# INIT CONDA
+#conda init bash
+
+# ACTIVATE CONDA ENV
+conda activate TF       # if already setup, no need to run functions below interactively
+
 bash gmd_prodmd.sh		# run production MD
+
+conda deactivate     # deactivate
 
 ############################################</RUN COMMANDS>###########################################
 
 ############################################<UNLOAD MODULES>##########################################
+
+module unload python/anaconda3-5.0.0.1  # unload anaconda after done using
+#module unload cuda91/toolkit/9.1.85     # unload cuda
+module unload cuda/10.1                   # load cuda
 
 module unload gromacs/2019-4	# unload GMX
 module unload gcc/9.2.0		# unload new gcc, 
