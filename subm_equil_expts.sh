@@ -11,6 +11,7 @@ for D in *; do
         cd "${D}"
         #echo "${D}"  # echo the directory name
         qsub qsub_emin_nvt_npt_equil.sh     # run qsub on the qsub script for preparation
+        sleep 5
         cd ..
     fi
 done

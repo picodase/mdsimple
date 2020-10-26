@@ -11,6 +11,7 @@ for D in *; do
         cd "${D}"
         #echo "${D}"   # your processing here
         qsub qsub_prodmd.sh     # run qsub on the qsub script for preparation
+        sleep 5
         cd ..
     fi
 done
