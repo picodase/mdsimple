@@ -11,15 +11,27 @@
 
 # ******************</DECLARE VARIABLES AND CONSTANTS>*******************
 
-# filepaths
-mdl_fp="/home/jnorth/Documents/GitHub/mdsimple/models/"
-mdp_fp="/home/jnorth/Documents/GitHub/mdsimple/standard/"
-md_ff="/home/jnorth/Documents/GitHub/mdsimple/gromos54a7_atb.ff/"
-md_base="/home/jnorth/Documents/GitHub/mdsimple/md_scripts/base_md/"
-md_simsrc="/home/jnorth/Documents/GitHub/mdsimple/sim_src/"
+# CLUSTER FILEPATH
+dataset_fp="/home/other/northj/datasets/refined-set/"
+mdl_fp="/home/other/northj/GitHub/mdsimple/models/"
+mdp_fp="/home/other/northj/GitHub/mdsimple/standard/"
+md_ff="/home/other/northj/GitHub/mdsimple/gromos54a7_atb.ff/"
+md_base="/home/other/northj/GitHub/mdsimple/md_scripts/base_md/"
+md_simsrc="/home/other/northj/GitHub/mdsimple/sim_src/"
+
+# HOME PC FILEPATH
+#mdl_fp="/home/jnorth/Documents/GitHub/mdsimple/models/"
+#mdp_fp="/home/jnorth/Documents/GitHub/mdsimple/standard/"
+#md_ff="/home/jnorth/Documents/GitHub/mdsimple/gromos54a7_atb.ff/"
+#md_base="/home/jnorth/Documents/GitHub/mdsimple/md_scripts/base_md/"
+#md_simsrc="/home/jnorth/Documents/GitHub/mdsimple/sim_src/"
 
 # specify all variables beforehand
-sim_modl=(5KV7)
+sim_modl=(1ctu 1sl3 5bry 3o9i 4dfg 3p3g 1z6e 5sz7 4cd0 3sm2 2vh6 1mrw 1fkb 6eol 4qgd 2bak 5nk3 2pou 1t32 4j21)
+
+# retrieve files from the PDBBind folder
+
+
 #sim_modl=(acetone cyp fab)     # names of pdb-type models in PWD/modl verified pre-simulation
 #sim_modl=(acetone)     # names of pdb-type models in PWD/modl verified pre-simulation
 sim_reps=(1 2)     # number of replicates to run each simulation for
@@ -43,7 +55,7 @@ sys_solv="Non-Protein"
 # ******************<PREPARE EXPT FOLDERS>********************
 
 # make dir to store expt datafiles
-mkdir expts 
+mkdir expts
 cd expts
 
 # make experiment directories
@@ -61,7 +73,7 @@ do
                     for (( n = 0 ; n <= ${#sim_stps[@]}-1; n++ ))
                     do
                         sim_name="${sim_modl[i]}_${sim_reps[j]}_${sim_tmps[k]}_${sim_solv[l]}_${sim_ffld[m]}_${sim_stps[n]}"
-                        
+
                         mkdir ${sim_name}
 
                         # enter the new folder
@@ -79,11 +91,11 @@ do
                         # use sed to replace sim params with desired parameters
                         ## Ensure you make the files dynamically indexable; do NOT write w.r.t. specific line numbers, use a special token, e.g. [EXPTEMP]
 
-                        # in em.mdp, 
+                        # in em.mdp,
                         sed -i "s/SIM_TITLE/${sim_name}/g" standard/em.mdp
 
                         # in nvt.mdp,
-                        sed -i "s/SIM_TITLE/${sim_name}/g" standard/nvt.mdp                        
+                        sed -i "s/SIM_TITLE/${sim_name}/g" standard/nvt.mdp
                         sed -i "s/T_REF/${sim_tmps[k]}/g" standard/nvt.mdp    # replace T_ref with sim_tmps[k]
                         sed -i "s/PROT/${sys_prot}/g" standard/nvt.mdp   # replace [PROT] with sys_prot
                         sed -i "s/SOLV/${sys_solv}/g" standard/nvt.mdp   # replace [SOLV] with sys_solv
@@ -95,8 +107,8 @@ do
                         sed -i "s/SOL_ITC/${solv_itc[l]}/g" standard/npt.mdp    # replace [SOL_ITC] with solv_itc[l]
                         sed -i "s/T_REF/${sim_tmps[k]}/g" standard/npt.mdp    # replace T_ref with sim_tmps[k]
 
-                        # in md.mdp, 
-                        sed -i "s/SIM_TITLE/${sim_name}/g" standard/md.mdp                        
+                        # in md.mdp,
+                        sed -i "s/SIM_TITLE/${sim_name}/g" standard/md.mdp
                         sed -i "s/N_STEPS/${sim_stps}/g" standard/md.mdp  # replace [N_STEPS] with 5000000 for 10ns sim
                         sed -i "s/T_REF/${sim_tmps[k]}/g" standard/md.mdp    # replace T_ref with sim_tmps[k]
                         sed -i "s/SOL_ITC/${solv_itc[l]}/g" standard/md.mdp   # replace [SOL_ITC] with solv_itc[l]
