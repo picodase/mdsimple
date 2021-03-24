@@ -27,10 +27,20 @@ md_simsrc="/home/other/northj/GitHub/mdsimple/sim_src/"
 #md_simsrc="/home/jnorth/Documents/GitHub/mdsimple/sim_src/"
 
 # specify all variables beforehand
-sim_modl=(1ctu 1sl3 5bry 3o9i 4dfg 3p3g 1z6e 5sz7 4cd0 3sm2 2vh6 1mrw 1fkb 6eol 4qgd 2bak 5nk3 2pou 1t32 4j21)
+sim_modl=(1CTU 1SL3 5BRY 3O9I 4DFG 3P3G 1Z6E 5SZ7 4CD0 3SM2 2VH6 1MRW 1FKB 6EOL 4QGD 2BAK 5NK3 2POU 1T32 4J21)
 
-# retrieve files from the PDBBind folder
+# Convert all strings in the sim_modl array to uppercase
 
+# * Retrieve files from the PDBBind folder:
+
+for e in ${sim_modl[@]}	# For each string in the sim_modl array,
+do
+	FILE=${dataset_fp}/${e}/${e,,}_protein.pdb
+	if [ -f "$FILE" ]; then
+		# If the directory contains the current model name suffixed with _protein.pdb,
+		cp ${FILE} ${mdl_fp}	# Copy this ${PDB_ID}_protein.pdb file to the "models" filepath as ${PDB_ID}.pdb
+	fi
+done
 
 #sim_modl=(acetone cyp fab)     # names of pdb-type models in PWD/modl verified pre-simulation
 #sim_modl=(acetone)     # names of pdb-type models in PWD/modl verified pre-simulation
