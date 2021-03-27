@@ -6,7 +6,7 @@
 
 # for each folder,
 
-for D in *; do
+for D in expts/*; do
     if [ -d "${D}" ]; then
         cd "${D}"
         #echo "${D}"  # echo the directory name

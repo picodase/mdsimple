@@ -1,5 +1,7 @@
 #!/bin/bash
 
+set -e	# If anything fails exit!
+
 # ******************<DECLARE VARIABLES AND CONSTANTS>********************
 
 # take in arrays or values of variables!
@@ -27,18 +29,28 @@ md_simsrc="/home/other/northj/GitHub/mdsimple/sim_src/"
 #md_simsrc="/home/jnorth/Documents/GitHub/mdsimple/sim_src/"
 
 # specify all variables beforehand
-sim_modl=(1CTU 1SL3 5BRY 3O9I 4DFG 3P3G 1Z6E 5SZ7 4CD0 3SM2 2VH6 1MRW 1FKB 6EOL 4QGD 2BAK 5NK3 2POU 1T32 4J21)
+
+# Removed 1CTU 1SL3 5BRY 3O9I 4DFG 3P3G 1Z6E 
+
+sim_modl=(3SM2)
+# 5SZ7 4CD0 3SM2 2VH6 1MRW 1FKB 6EOL 4QGD 2BAK 5NK3 2POU 1T32 4J21)
 
 # Convert all strings in the sim_modl array to uppercase
+
+# If the models directory doesn't exist,
+if [ ! -d ./models ]; then
+	mkdir -p models;
+fi
 
 # * Retrieve files from the PDBBind folder:
 
 for e in ${sim_modl[@]}	# For each string in the sim_modl array,
 do
-	FILE=${dataset_fp}/${e}/${e,,}_protein.pdb
+	FILE=${dataset_fp}${e,,}/${e,,}_protein.pdb
 	if [ -f "$FILE" ]; then
+		echo ${FILE}
 		# If the directory contains the current model name suffixed with _protein.pdb,
-		cp ${FILE} ${mdl_fp}	# Copy this ${PDB_ID}_protein.pdb file to the "models" filepath as ${PDB_ID}.pdb
+		cp ${FILE} ${mdl_fp}${e}.pdb	# Copy this ${PDB_ID}_protein.pdb file to the "models" filepath as ${PDB_ID}.pdb
 	fi
 done
 
@@ -64,8 +76,12 @@ sys_solv="Non-Protein"
 
 # ******************<PREPARE EXPT FOLDERS>********************
 
+
 # make dir to store expt datafiles
-mkdir expts
+if [ ! -d ./expts ]; then
+	mkdir -p expts;
+fi
+
 cd expts
 
 # make experiment directories
@@ -84,7 +100,7 @@ do
                     do
                         sim_name="${sim_modl[i]}_${sim_reps[j]}_${sim_tmps[k]}_${sim_solv[l]}_${sim_ffld[m]}_${sim_stps[n]}"
 
-                        mkdir ${sim_name}
+                        mkdir -p ${sim_name}
 
                         # enter the new folder
                         cd ${sim_name}
@@ -95,8 +111,9 @@ do
                         #cp ${md_simsrc}* .  # topology, box coord, posre files       # currently for a single protein type!
                         cp ${md_base}* .            # copy everything in md_base to cwd
                         cp -r ${mdp_fp} .                  # copy standard folder of mdps
-                        cp ${mdl_fp}*${sim_modl[i]}.pdb .   # copy proper model
-                        cp -r ../../*.ff/ .                 # copy ff dirs
+                        #cp ${mdl_fp}*${sim_modl[i]}.pdb .   # copy proper model
+                        cp ${mdl_fp}${sim_modl[i]}.pdb .   # copy proper model
+                        #cp -r ../../*.ff/ .                 # copy ff dirs
 
                         # use sed to replace sim params with desired parameters
                         ## Ensure you make the files dynamically indexable; do NOT write w.r.t. specific line numbers, use a special token, e.g. [EXPTEMP]
@@ -135,14 +152,16 @@ do
                         ##~~~~~~~~~~~~~~~~~~~~~~~~##
                         # if the models have not been generated yet, you can create them here with this (best for only canonically supported structures by the ff):
 
-                        cp ${name}.pdb ${name}_clean.pdb        # alias, it's being weird now
+			# Select one of the following
+			grep -v HOH ${name}.pdb > ${name}_clean.pdb	# WARNING! NOT REASONABLE FOR TIGHLY BOUND WATERS!!!
+                        #cp ${name}.pdb ${name}_clean.pdb        # alias, it's being weird now
 
-                        gmx pdb2gmx -f ${name}_clean.pdb -o ${name}_processed.gro       # convert to gmx
+                        gmx pdb2gmx -f ${name}_clean.pdb -o ${name}_processed.gro -ignh      # convert to gmx
                         gmx editconf -f ${name}_processed.gro -o ${name}_newbox.gro -c -d 1.0 -bt cubic # put in a box
                         ##~~~~~~~~~~~~~~~~~~~~~~~~##
 
                         #gmx solvate -cp ${spec_pref}_newbox.gro -cs ${solv_file[l]} -o ${name}_solv.gro -p topol.top
-                        gmx solvate -cp ${name}_newbox.gro -cs ${solv_file[l]} -o ${name}_solv.gro -p topol.top
+                        gmx solvate -cp ${name}_newbox.gro -cs ${solv_file[l]} -p topol.top -o ${name}_solv.gro
 
                         gmx grompp -f standard/ions.mdp -c ${name}_solv.gro -p topol.top -o ions.tpr -maxwarn 1    # Generate the restraint file
                         gmx genion -s ions.tpr -o ${name}_solv_ions.gro -p topol.top -pname NA -nname CL -neutral   # Generate ions inside the box
