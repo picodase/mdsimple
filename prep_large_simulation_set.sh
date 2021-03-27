@@ -30,10 +30,10 @@ md_simsrc="/home/other/northj/GitHub/mdsimple/sim_src/"
 
 # specify all variables beforehand
 
-# Removed 1CTU 1SL3 5BRY 3O9I 4DFG 3P3G 1Z6E 
+# Removed 1CTU 1SL3 5BRY 3O9I 4DFG 3P3G 1Z6E 5SZ7 4CD0 2VH6 4QGD 1T32 4J21 
+# Working: 3SM2 2BAK 5NK3 + others
 
-sim_modl=(3SM2)
-# 5SZ7 4CD0 3SM2 2VH6 1MRW 1FKB 6EOL 4QGD 2BAK 5NK3 2POU 1T32 4J21)
+sim_modl=()
 
 # Convert all strings in the sim_modl array to uppercase
 
@@ -56,7 +56,7 @@ done
 
 #sim_modl=(acetone cyp fab)     # names of pdb-type models in PWD/modl verified pre-simulation
 #sim_modl=(acetone)     # names of pdb-type models in PWD/modl verified pre-simulation
-sim_reps=(1 2)     # number of replicates to run each simulation for
+sim_reps=(1)     # number of replicates to run each simulation for
 #sim_tmps=(298 310)
 sim_tmps=(310)
 #sim_solv=(SPC AON)     # names of solvents in PWD/solv verified pre-simulation
@@ -79,7 +79,7 @@ sys_solv="Non-Protein"
 
 # make dir to store expt datafiles
 if [ ! -d ./expts ]; then
-	mkdir -p expts;
+	mkdir expts;
 fi
 
 cd expts

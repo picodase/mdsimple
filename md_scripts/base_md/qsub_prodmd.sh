@@ -28,13 +28,18 @@
 ############################################<LOAD MODULES>############################################
 
 # Load a module, if needed
-module unload gcc/5.1.0		# remove earlier gcc
-module load gcc/9.2.0		# load new gcc
-module load gromacs/2019-4	# load GMX
+#module unload gcc/5.1.0		# remove earlier gcc
+#module load gcc/9.2.0		# load new gcc
+#module load gromacs/2019-4	# load GMX
+module load python/anaconda3-latest	# Load conda 
 
 ############################################</LOAD MODULES>###########################################
 
 ############################################<RUN COMMANDS>############################################
+
+eval "$(command conda 'shell.bash' 'hook' 2> /dev/null)"
+
+conda activate MD
 
 bash gmd_prodmd.sh		# run production MD
 
@@ -42,8 +47,9 @@ bash gmd_prodmd.sh		# run production MD
 
 ############################################<UNLOAD MODULES>##########################################
 
-module unload gromacs/2019-4	# unload GMX
-module unload gcc/9.2.0		# unload new gcc, 
-module load gcc/5.1.0		# reload old gcc
+module unload python/anaconda3-latest	# Load conda 
+#module unload gromacs/2019-4	# unload GMX
+#module unload gcc/9.2.0		# unload new gcc, 
+#module load gcc/5.1.0		# reload old gcc
 
 ############################################</UNLOAD MODULES>#########################################
