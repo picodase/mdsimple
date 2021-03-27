@@ -33,7 +33,9 @@ md_simsrc="/home/other/northj/GitHub/mdsimple/sim_src/"
 # Removed 1CTU 1SL3 5BRY 3O9I 4DFG 3P3G 1Z6E 5SZ7 4CD0 2VH6 4QGD 1T32 4J21 
 # Working: 3SM2 2BAK 5NK3 + others
 
-sim_modl=()
+sim_modl=( $( cat input.strucs ) )
+
+#sim_modl=()
 
 # Convert all strings in the sim_modl array to uppercase
 
@@ -98,76 +100,80 @@ do
                 do
                     for (( n = 0 ; n <= ${#sim_stps[@]}-1; n++ ))
                     do
-                        sim_name="${sim_modl[i]}_${sim_reps[j]}_${sim_tmps[k]}_${sim_solv[l]}_${sim_ffld[m]}_${sim_stps[n]}"
+			sim_name="${sim_modl[i]}_${sim_reps[j]}_${sim_tmps[k]}_${sim_solv[l]}_${sim_ffld[m]}_${sim_stps[n]}"
 
-                        mkdir -p ${sim_name}
+			# If the simulation hasn't already been run yet, set itup
+			if [ ! -d ./${sim_name} ]; then
 
-                        # enter the new folder
-                        cd ${sim_name}
+	                        mkdir -p ${sim_name}
 
-                        # copy standard data to cwd
+        	                # enter the new folder
+           	             	cd ${sim_name}
+	
+        	                # copy standard data to cwd
 
-                        ##### UNCOMMENT THE FOLLOWING LINE IF YOU'RE JUST USING A SINGLE PROTEIN TYPE!!!#####
-                        #cp ${md_simsrc}* .  # topology, box coord, posre files       # currently for a single protein type!
-                        cp ${md_base}* .            # copy everything in md_base to cwd
-                        cp -r ${mdp_fp} .                  # copy standard folder of mdps
-                        #cp ${mdl_fp}*${sim_modl[i]}.pdb .   # copy proper model
-                        cp ${mdl_fp}${sim_modl[i]}.pdb .   # copy proper model
-                        #cp -r ../../*.ff/ .                 # copy ff dirs
+                	        ##### UNCOMMENT THE FOLLOWING LINE IF YOU'RE JUST USING A SINGLE PROTEIN TYPE!!!#####
+                        	#cp ${md_simsrc}* .  # topology, box coord, posre files       # currently for a single protein type!
+	                        cp ${md_base}* .            # copy everything in md_base to cwd
+        	                cp -r ${mdp_fp} .                  # copy standard folder of mdps
+                	        #cp ${mdl_fp}*${sim_modl[i]}.pdb .   # copy proper model
+                        	cp ${mdl_fp}${sim_modl[i]}.pdb .   # copy proper model
+	                        #cp -r ../../*.ff/ .                 # copy ff dirs
 
-                        # use sed to replace sim params with desired parameters
-                        ## Ensure you make the files dynamically indexable; do NOT write w.r.t. specific line numbers, use a special token, e.g. [EXPTEMP]
+        	                # use sed to replace sim params with desired parameters
+                	        ## Ensure you make the files dynamically indexable; do NOT write w.r.t. specific line numbers, use a special token, e.g. [EXPTEMP]
 
-                        # in em.mdp,
-                        sed -i "s/SIM_TITLE/${sim_name}/g" standard/em.mdp
+                        	# in em.mdp,
+	                        sed -i "s/SIM_TITLE/${sim_name}/g" standard/em.mdp
 
-                        # in nvt.mdp,
-                        sed -i "s/SIM_TITLE/${sim_name}/g" standard/nvt.mdp
-                        sed -i "s/T_REF/${sim_tmps[k]}/g" standard/nvt.mdp    # replace T_ref with sim_tmps[k]
-                        sed -i "s/PROT/${sys_prot}/g" standard/nvt.mdp   # replace [PROT] with sys_prot
-                        sed -i "s/SOLV/${sys_solv}/g" standard/nvt.mdp   # replace [SOLV] with sys_solv
+        	                # in nvt.mdp,
+                	        sed -i "s/SIM_TITLE/${sim_name}/g" standard/nvt.mdp
+                        	sed -i "s/T_REF/${sim_tmps[k]}/g" standard/nvt.mdp    # replace T_ref with sim_tmps[k]
+        	                sed -i "s/PROT/${sys_prot}/g" standard/nvt.mdp   # replace [PROT] with sys_prot
+	                        sed -i "s/SOLV/${sys_solv}/g" standard/nvt.mdp   # replace [SOLV] with sys_solv
 
-                        # in npt.mdp, replace
-                        sed -i "s/SIM_TITLE/${sim_name}/g" standard/npt.mdp
-                        sed -i "s/PROT/${sys_prot}/g" standard/npt.mdp   # replace [PROT] with sys_prot
-                        sed -i "s/SOLV/${sys_solv}/g" standard/npt.mdp   # replace [SOLV] with sys_solv
-                        sed -i "s/SOL_ITC/${solv_itc[l]}/g" standard/npt.mdp    # replace [SOL_ITC] with solv_itc[l]
-                        sed -i "s/T_REF/${sim_tmps[k]}/g" standard/npt.mdp    # replace T_ref with sim_tmps[k]
+                	        # in npt.mdp, replace
+                        	sed -i "s/SIM_TITLE/${sim_name}/g" standard/npt.mdp
+	                        sed -i "s/PROT/${sys_prot}/g" standard/npt.mdp   # replace [PROT] with sys_prot
+        	                sed -i "s/SOLV/${sys_solv}/g" standard/npt.mdp   # replace [SOLV] with sys_solv
+                	        sed -i "s/SOL_ITC/${solv_itc[l]}/g" standard/npt.mdp    # replace [SOL_ITC] with solv_itc[l]
+                        	sed -i "s/T_REF/${sim_tmps[k]}/g" standard/npt.mdp    # replace T_ref with sim_tmps[k]
 
-                        # in md.mdp,
-                        sed -i "s/SIM_TITLE/${sim_name}/g" standard/md.mdp
-                        sed -i "s/N_STEPS/${sim_stps}/g" standard/md.mdp  # replace [N_STEPS] with 5000000 for 10ns sim
-                        sed -i "s/T_REF/${sim_tmps[k]}/g" standard/md.mdp    # replace T_ref with sim_tmps[k]
-                        sed -i "s/SOL_ITC/${solv_itc[l]}/g" standard/md.mdp   # replace [SOL_ITC] with solv_itc[l]
-                        sed -i "s/PROT/${sys_prot}/g" standard/md.mdp   # replace [PROT] with sys_prot
-                        sed -i "s/SOLV/${sys_solv}/g" standard/md.mdp   # replace [SOLV] with sys_solv
+	                        # in md.mdp,
+        	                sed -i "s/SIM_TITLE/${sim_name}/g" standard/md.mdp
+                	        sed -i "s/N_STEPS/${sim_stps}/g" standard/md.mdp  # replace [N_STEPS] with 5000000 for 10ns sim
+                        	sed -i "s/T_REF/${sim_tmps[k]}/g" standard/md.mdp    # replace T_ref with sim_tmps[k]
+	                        sed -i "s/SOL_ITC/${solv_itc[l]}/g" standard/md.mdp   # replace [SOL_ITC] with solv_itc[l]
+        	                sed -i "s/PROT/${sys_prot}/g" standard/md.mdp   # replace [PROT] with sys_prot
+                	        sed -i "s/SOLV/${sys_solv}/g" standard/md.mdp   # replace [SOLV] with sys_solv
 
-                        # run all pre-processing steps
+                        	# run all pre-processing steps
 
-                        #name=${spec_pref}_${sim_modl[i]}        # shorthand for filenames
-                        name=${sim_modl[i]}        # shorthand for filenames
+        	                #name=${spec_pref}_${sim_modl[i]}        # shorthand for filenames
+	                        name=${sim_modl[i]}        # shorthand for filenames
 
-                        ##### UNCOMMENT THE FOLLOWING LINES IF YOU'RE JUST USING A SINGLE PROTEIN TYPE!!!#####
+                	        ##### UNCOMMENT THE FOLLOWING LINES IF YOU'RE JUST USING A SINGLE PROTEIN TYPE!!!#####
 
-                        ##~~~~~~~~~~~~~~~~~~~~~~~~##
-                        # if the models have not been generated yet, you can create them here with this (best for only canonically supported structures by the ff):
+                        	##~~~~~~~~~~~~~~~~~~~~~~~~##
+	                        # if the models have not been generated yet, you can create them here with this (best for only canonically supported structures by the ff):
 
-			# Select one of the following
-			grep -v HOH ${name}.pdb > ${name}_clean.pdb	# WARNING! NOT REASONABLE FOR TIGHLY BOUND WATERS!!!
-                        #cp ${name}.pdb ${name}_clean.pdb        # alias, it's being weird now
+				# Select one of the following
+				grep -v HOH ${name}.pdb > ${name}_clean.pdb	# WARNING! NOT REASONABLE FOR TIGHLY BOUND WATERS!!!
+                	        #cp ${name}.pdb ${name}_clean.pdb        # alias, it's being weird now
 
-                        gmx pdb2gmx -f ${name}_clean.pdb -o ${name}_processed.gro -ignh      # convert to gmx
-                        gmx editconf -f ${name}_processed.gro -o ${name}_newbox.gro -c -d 1.0 -bt cubic # put in a box
-                        ##~~~~~~~~~~~~~~~~~~~~~~~~##
+                        	gmx pdb2gmx -f ${name}_clean.pdb -o ${name}_processed.gro -ignh      # convert to gmx
+	                        gmx editconf -f ${name}_processed.gro -o ${name}_newbox.gro -c -d 1.0 -bt cubic # put in a box
+        	                ##~~~~~~~~~~~~~~~~~~~~~~~~##
 
-                        #gmx solvate -cp ${spec_pref}_newbox.gro -cs ${solv_file[l]} -o ${name}_solv.gro -p topol.top
-                        gmx solvate -cp ${name}_newbox.gro -cs ${solv_file[l]} -p topol.top -o ${name}_solv.gro
+                	        #gmx solvate -cp ${spec_pref}_newbox.gro -cs ${solv_file[l]} -o ${name}_solv.gro -p topol.top
+                	        gmx solvate -cp ${name}_newbox.gro -cs ${solv_file[l]} -p topol.top -o ${name}_solv.gro
 
-                        gmx grompp -f standard/ions.mdp -c ${name}_solv.gro -p topol.top -o ions.tpr -maxwarn 1    # Generate the restraint file
-                        gmx genion -s ions.tpr -o ${name}_solv_ions.gro -p topol.top -pname NA -nname CL -neutral   # Generate ions inside the box
-                        gmx grompp -f standard/em.mdp -c ${name}_solv_ions.gro -p topol.top -o em.tpr -maxwarn 2    # Assemble the binary input
+                        	gmx grompp -f standard/ions.mdp -c ${name}_solv.gro -p topol.top -o ions.tpr -maxwarn 1    # Generate the restraint file
+	                        gmx genion -s ions.tpr -o ${name}_solv_ions.gro -p topol.top -pname NA -nname CL -neutral   # Generate ions inside the box
+        	                gmx grompp -f standard/em.mdp -c ${name}_solv_ions.gro -p topol.top -o em.tpr -maxwarn 2    # Assemble the binary input
 
-                        cd ..           # exit the folder
+                	        cd ..           # exit the folder
+			fi 
                     done
                 done
             done
