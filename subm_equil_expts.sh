@@ -16,6 +16,11 @@ for D in expts/*; do
 		echo -e "${D}/ \t(em.trr) DNE\t>>>\t Submitting equilibration job..."
 		cd ${D}		# Enter the directory
 		#echo "${D}"  	# Echo the directory name
+
+		sim_name="equil_${PWD##*/}"
+
+		sed -i "s/emin_nvt_npt_equilibration/${sim_name}/g" qsub_emin_nvt_npt_equil.sh	# Use `sed` to add the title (sans "expts") to the qsub script
+		
 		qsub qsub_emin_nvt_npt_equil.sh	# Run qsub on the qsub script for preparation
 		sleep 0.5	# Give a brief wait
 		cd ../..	# Exit the directory / back to the starting folder, "mdsimple
