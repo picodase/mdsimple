@@ -1,6 +1,38 @@
 #!/bin/bash
 
-set -e	# If anything fails exit!
+Help()
+{
+	# Display Help
+	echo "prep_large_simulation_set.sh"
+	echo
+	echo "Syntax:	bash prep_large_simulation_set.sh [-g|h|v|V]"
+	echo "options:"
+	echo "	g	Print the GPL license notification.		(NOT IMPLEMENTED)"
+	echo "	h	Print this Help."
+	echo "	i	Interactive structure parsing mode.		(NOT IMPLEMENTED)"
+	echo "	a	Automated structure parsing mode.		(NOT IMPLEMENTED)"
+	echo "	v	Verbose mode.					(NOT IMPLEMENTED)"
+	echo "	V	Print software version and exit.		(NOT IMPLEMENTED)"
+	echo
+}
+
+if [ "$1" = "-h" ] ; then
+	Help
+	exit 0
+fi
+
+# Interactive mode
+if [ "$1" = "-i" ]; then
+	set -e	# If anything fails, exit!
+fi
+
+# Automated parsing mode
+if [ "$1" = "-a" ]; then
+	automated=true# If something fails,
+	failed=()	# Append the current structure to the list of failed structures
+fi
+
+set -e	# If anything fails, exit!
 
 # ******************<DECLARE VARIABLES AND CONSTANTS>********************
 
@@ -50,34 +82,36 @@ for e in ${sim_modl[@]}	# For each string in the sim_modl array,
 do
 	FILE=${dataset_fp}${e,,}/${e,,}_protein.pdb
 	if [ -f "$FILE" ]; then
-		echo ${FILE}
+		echo -e "Copying\t ${FILE}\t..."
 		# If the directory contains the current model name suffixed with _protein.pdb,
 		cp ${FILE} ${mdl_fp}${e}.pdb	# Copy this ${PDB_ID}_protein.pdb file to the "models" filepath as ${PDB_ID}.pdb
 	fi
 done
 
+# Take in all variables required for simulation setup
+source sim_vars.sh
+
 #sim_modl=(acetone cyp fab)     # names of pdb-type models in PWD/modl verified pre-simulation
 #sim_modl=(acetone)     # names of pdb-type models in PWD/modl verified pre-simulation
-sim_reps=(1)     # number of replicates to run each simulation for
+#sim_reps=(1)     # number of replicates to run each simulation for
 #sim_tmps=(298 310)
-sim_tmps=(310)
+#sim_tmps=(310)
 #sim_solv=(SPC AON)     # names of solvents in PWD/solv verified pre-simulation
-sim_solv=(SPC)     # names of solvents in PWD/solv verified pre-simulation
-sim_ffld=(G54a7)     # names of force fields in PWD/ffld (?) verified pre-simulation
-sim_stps=(250000000)     # length of time
+#sim_solv=(SPC)     # names of solvents in PWD/solv verified pre-simulation
+#sim_ffld=(G54a7)     # names of force fields in PWD/ffld (?) verified pre-simulation
+#sim_stps=(250000000)     # length of time
 #sim_ligs=(None)     # names of ligands (can be array of arrays!) in PWD/ligs verified pre-simulation
 
 # selection variables for mdp files
-spec_pref=("drugdes_protein_dynamics")
+#spec_pref=("drugdes_protein_dynamics")
 #solv_itc=("4.5e-5" "1.25e-2")
-solv_itc=("4.5e-5")
+#solv_itc=("4.5e-5")
 #solv_file=("spc216.gro" "gromos54a7_atb.ff/aon_box_g.gro")
-solv_file=("spc216.gro")
-sys_prot="Protein"
-sys_solv="Non-Protein"
+#solv_file=("spc216.gro")
+#sys_prot="Protein"
+#sys_solv="Non-Protein"
 
 # ******************<PREPARE EXPT FOLDERS>********************
-
 
 # make dir to store expt datafiles
 if [ ! -d ./expts ]; then
@@ -102,7 +136,7 @@ do
                     do
 			sim_name="${sim_modl[i]}_${sim_reps[j]}_${sim_tmps[k]}_${sim_solv[l]}_${sim_ffld[m]}_${sim_stps[n]}"
 
-			# If the simulation hasn't already been run yet, set itup
+			# If the simulation hasn't already been run yet, set it up
 			if [ ! -d ./${sim_name} ]; then
 
 	                        mkdir -p ${sim_name}
@@ -162,6 +196,14 @@ do
                 	        #cp ${name}.pdb ${name}_clean.pdb        # alias, it's being weird now
 
                         	gmx pdb2gmx -f ${name}_clean.pdb -o ${name}_processed.gro -ignh      # convert to gmx
+				pdb2gmxstatus=$?	# Get the status of the structure, to tell whether it failed
+				# Check the status!
+				if [[ ! pdb2gmxstatus = 0 ]] && [[ automated ]] ; then	# If pdb2gmx failed and the parsing mode is set to "automated", then
+					failed+=${name}	# Append this structure's ID to the "failed" array
+					echo "${name}" >> failed.strucs	# Append this ID to the failed.strucs file
+					break	# Leave this structure, but continue execution on the remaining items
+				fi
+
 	                        gmx editconf -f ${name}_processed.gro -o ${name}_newbox.gro -c -d 1.0 -bt cubic # put in a box
         	                ##~~~~~~~~~~~~~~~~~~~~~~~~##
 
@@ -171,7 +213,6 @@ do
                         	gmx grompp -f standard/ions.mdp -c ${name}_solv.gro -p topol.top -o ions.tpr -maxwarn 1    # Generate the restraint file
 	                        gmx genion -s ions.tpr -o ${name}_solv_ions.gro -p topol.top -pname NA -nname CL -neutral   # Generate ions inside the box
         	                gmx grompp -f standard/em.mdp -c ${name}_solv_ions.gro -p topol.top -o em.tpr -maxwarn 2    # Assemble the binary input
-
                 	        cd ..           # exit the folder
 			fi 
                     done
